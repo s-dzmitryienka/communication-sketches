@@ -1,0 +1,3 @@
+class Delivery:
+	notification: Notification
+	
