@@ -1,17 +1,30 @@
+from abc import abstractmethod
+from enum import Enum
+from fake_imports import EmailProvider, SmsProvider
+from message import Message
+from receiver_contact import ReceiverContact
+
+from sending_settings import SendingSettings
+
+
+class NotificationChannelType(Enum):
+    SMS = "SMS"
+    EMAIL = "EMAIL"
+
+
 class NotificationChannelInterface:
-    type: Union[SMS, EMAIL, TELEGRAM]
+    type: NotificationChannelType
     sending_settings: SendingSettings(related_name="notification_channels")
 
     @property
     def provider(self):
         return {
-            SMS: SmsProvider,
-            EMAIL: EmailProvider,
+            NotificationChannelType.SMS: SmsProvider,
+            NotificationChannelType.EMAIL: EmailProvider,
         }.get(self.type)
 
-
     @abstractmethod
-    def notify(self, notification: Notification) -> None:
+    def send(self, receiver_contact: ReceiverContact, message: Message) -> None:
         """
         Sends notification using the special channel type
         """
@@ -19,22 +32,22 @@ class NotificationChannelInterface:
 
 
 class SmsNotificationChannel(NotificationChannelInterface):
-    type = SMS
+    type = NotificationChannelType.SMS
 
     def __send_sms(self, *args, **kwargs):
         self.provider.send_sms(*args, **kwargs)
     
-    def notify(self, notification: Notification) -> None:
-        phone, message = notification.contact, notification.message
-        return self.__send_sms(phone=phone, message=message)
+    def send(self, receiver_contact: ReceiverContact, message: Message) -> None:
+        msg = message.prepare_plain_text()
+        return self.__send_sms(phone=receiver_contact.phone, message=msg)
 
 
 class EmailNotificationChannel(NotificationChannelInterface):
-    type = EMAIL
+    type = NotificationChannelType.EMAIL
 
-    def __send_email(self, notification: Notification):
-        self.provide.send_email(*args, **kwargs)
+    def __send_email(self, *args, **kwargs):
+        self.provider.send_email(*args, **kwargs)
     
-    def notify(self, *args, **kwargs) -> None:
-        email, message = notification.contact, notification.message
-        return self.__send_email(email=email, message=message)
+    def send(self, receiver_contact: ReceiverContact, message: Message) -> None:
+        msg = message.prepare_html_text()
+        return self.__send_email(email=receiver_contact.email, message=msg)
