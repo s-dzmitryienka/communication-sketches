@@ -7,6 +7,24 @@ from sending_settings import SendingSettings
 
 
 class Notification:
+    """
+    Notification:
+	- NotificationItem(SMS): ID -> redis ID: JSON
+		- delieverySms:
+			attempt1
+			attempt2 
+	- NotificationItem(EMAIL) -> redis ID: JSON
+		- delieveryEmail:
+			attempt1
+			attempt2 
+	- NotificationItem(WhatsUp) -> redis ID: JSON
+		- delieveryWhatsUp:
+			attempt1
+			attempt2 
+    """
+    linked_object_id: UUID
+    linked_object_type: Enum
+
     type: NotificationType
     sending_settings: SendingSettings
     
