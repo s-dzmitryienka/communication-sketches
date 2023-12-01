@@ -48,5 +48,5 @@ class NotificationConditionalProcessorAfterPayments(NotificationConditionalProce
     def build_message(self, *args, **kwargs) -> bool:
         return AbstractMessagesFactory.create_after_payments_complete_message(guest_payment=instance)
     
-    def send_if_needed(self, *args, **kwargs) -> bool:
+    def should_send(self, *args, **kwargs) -> bool:
         return True if all conditions passed else False
