@@ -31,6 +31,9 @@ class Guest: pass
 class GuestMembership: pass
 
 
+class GuestPaymentStatus: pass
+
+
 def render_html_text(*args, **kwargs): pass
 
 

@@ -1,9 +1,16 @@
 from abc import abstractmethod
+from enum import Enum
+from uuid import UUID
 from message import Message
 from notification_status import NotificationStatus
 from notification_type import NotificationType
 from receiver_contact import ReceiverContact
 from sending_settings import SendingSettings
+
+
+class NotificationLinkedObjectClassifier(Enum):
+    RESERVATION = "RESERVATION"
+    GUEST_PAYMENT = "GUEST_PAYMENT"
 
 
 class Notification:
@@ -23,7 +30,7 @@ class Notification:
 			attempt2 
     """
     linked_object_id: UUID
-    linked_object_type: Enum
+    linked_object_type: NotificationLinkedObjectClassifier
 
     type: NotificationType
     sending_settings: SendingSettings

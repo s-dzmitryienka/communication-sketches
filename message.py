@@ -47,13 +47,13 @@ class AbstractMessagesFactory:
     @classmethod
     def create_after_payments_complete_message(cls, guest_payment: GuestPayment) -> Message:
         return Message(
-            template_id=Template.objects.get_one_or_none(unique_name="AFTER_PAYMENTS_COMPLETE"),
+            template_id=Template.objects.get_one_or_none(unique_name="AFTER_PAYMENTS_COMPLETE"),  # todo: move to Enum
             context_builder=AfterGuestPaymentsCompleteContextBuilder(guest_payment=guest_payment),
         )
 
     @classmethod
     def create_after_guest_registration_message(cls, guest_membership: GuestMembership) -> Message:
         return Message(
-            template_id=Template.objects.get_one_or_none(unique_name="AFTER_GUEST_REGISTRATION"),
+            template_id=Template.objects.get_one_or_none(unique_name="AFTER_GUEST_REGISTRATION"),  # todo: move to Enum
             context_builder=AfterGuestRegistrationContextBuilder(guest_membership=guest_membership),
         )
