@@ -11,8 +11,16 @@ def post_save_payment_signal(sender, instance: GuestPayment, created: bool, sign
     ...
     reservation = instance.reservation
 
-    NotificationConditionalProcessorAfterPayments(
-        obj=instance,
-        sending_settings=reservation.sending_settings,
-        type=NotificationType.AFTER_PAYMENTS,
-    ).send_if_needed()
+    if COMPLETE:
+
+        TriggerAfterPaymentComplete(
+
+            NotificationConditionalProcessorAfterPayments(
+                obj=instance,
+                sending_settings=reservation.sending_settings,
+                type=NotificationType.AFTER_PAYMENTS,
+            ).send_if_needed()
+            
+            Webhook.send()
+
+        )

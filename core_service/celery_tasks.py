@@ -5,8 +5,8 @@ class NotificationServiceSenderTask(celery.Task):
         response = srv_cli.create_notification(payload)
         
         if response.status_code == 201:
-            task.set_status("SENT_TO_SERVICE")
+            task.status = "SENT_TO_SERVICE"
         else:
             task.status = "ERROR"
             task.status_details = str(response.content)[:512]
-            task.save()
+        task.save()

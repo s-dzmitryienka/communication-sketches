@@ -48,27 +48,33 @@ class NotificationTaskSenderProcessorInterface(ABC):
         """
         msg: dict = self.message.build_message_pack()
         receiver: dict = self.receiver_contact.to_jsonable()
+        sending_settings_obj = SendingSettings.objects.get(id=self.sending_settings_id)
         return {
                 "linked_object_id": self.linked_object_id,
                 "linked_object_type": self.linked_object_type,
                 "type": self.type,
                 "message": msg,
                 "receiver": receiver,
+                "sending_settings": sending_settings_obj.__dict__,
         }
 
     def store_payload(self, key: UUID, payload: dict):
-        self.storage.set(key, payload)
+        self.storage.set(key, payload)  # TTL ~3 months
 
     def create_task_and_send(self):
-        with transaction.atomic():
-            payload = self.build_notification_task_data()
-            task = NotificationTask.objects.create(
-                linked_object_id=self.linked_object_id,
-                linked_object_type=self.linked_object_type,
-                n_type=self.n_type,
-            )
+        payload = self.build_notification_task_data()
+        task = NotificationTask.objects.create(
+            linked_object_id=self.linked_object_id,
+            linked_object_type=self.linked_object_type,
+            n_type=self.n_type,
+            status="NEW"
+        )
+        try:
             self.store_payload(key=task.id, payload=payload)
-            NotificationServiceSenderTask.delay(task.id)
+        except Exception as e:
+            task.set_error(e)
+        else:
+            NotificationServiceSenderTask.delay(task.id)  # or maybe it's better to use worker as sender to service
 
 
 class NotificationTaskSenderProcessor(NotificationTaskSenderProcessorInterface):
