@@ -38,3 +38,6 @@ def render_html_text(*args, **kwargs): pass
 
 
 def render_plain_text(*args, **kwargs): pass
+
+
+class transaction: pass

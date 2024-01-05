@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from enum import Enum
 from fake_imports import EmailProvider, SmsProvider
-from message import Message
-from receiver_contact import ReceiverContact
+from core_service.message import Message
+from core_service.receiver_contact import ReceiverContact
 
-from sending_settings import SendingSettings
+from core_service.sending_settings import SendingSettings
 
 
 class NotificationChannelType(Enum):
