@@ -13,6 +13,12 @@ class NotificationLinkedObjectClassifier(Enum):
     GUEST_PAYMENT = "GUEST_PAYMENT"
 
 
+@dataclass
+class MessagePayload:
+    ...
+
+
+
 class Notification(Model):
     """
     Notification:
@@ -34,21 +40,54 @@ class Notification(Model):
     instance.
 
     """
+    id: UUID
     linked_object_id: UUID
     linked_object_type: NotificationLinkedObjectClassifier
 
     notification_task_id: UUID  # we can get this task from NoSQL and serialize it into some dataclass
 
-    type: NotificationType
-    sending_settings_id: UUID  # maybe store SendingSettings JSON obj in NoSQL and retrieve it during sending
+    n_type: NotificationType
     
-    message: Message
-    receiver_contact: ReceiverContact
-    
-    status: NotificationStatus
+    general_status: NotificationStatus
     status_details: str
 
-    @abstractmethod
+    @property
+    def message_payload(self) -> dict:
+        """
+        Have possibility to deserialize to some dataclass MessagePayload.
+
+        Expected format:
+            {
+                "linked_object_id": uuid,
+                "linked_object_type": str,
+                "type": str,
+                "message": dict,
+                "receiver": dict,
+                "sending_settings": dict
+            }
+
+        Message dict format:    
+            {
+                "type": "TEMPLATED",  # use ENUM
+                "payload": {
+                    "context": self.context,
+                    "template_name": self.template_name,
+            }
+        
+        Receiver contact dict format:
+            {
+                "phone": "+92837928",
+                "email": "lee@ls.com"
+            }
+        """
+        raw_dict = self.nosql_storage.get(self.notification_task_id)
+        return MessagePayload(**raw_dict)
+
+    @property
+    def sending_settings(self) -> dict:
+        msg: MessagePayload = self.message_payload
+        return msg.sending_settings
+
     def send(self) -> None:
         """
         Sends notification using each channel type associated in settings
@@ -56,8 +95,16 @@ class Notification(Model):
         # sending_settings = core_cli.get_sending_settings(self.sending_settings_id)
         # or sending_settings = dynamodb.get_sending_settings(self.sending_settings_id)
 
-        if sending_settings.is_email_channel_enabled:
-            EmailChannelSender.send(self.receiver_contact, self.message)
+        if self.sending_settings.is_email_channel_enabled:
+            email_notification_item: NotificationItem = NotificationItem.objects.create(
+                channel_type="EMAIL",
+                notification=self,
+                )
+            NotificationItemEmailSenderCeleryTask.delay(email_notification_item.id)
 
-        if sending_settings.is_sms_channel_enabled:
-            SMSChannelSender.send(self.receiver_contact, self.message)
+        if self.sending_settings.is_sms_channel_enabled:
+            sms_notification_item: NotificationItem = NotificationItem.objects.create(
+                channel_type="SMS",
+                notification=self,
+                )
+            NotificationItemSMSSenderCeleryTask.delay(sms_notification_item.id)

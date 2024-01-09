@@ -44,6 +44,7 @@ class NotificationTaskSenderProcessorInterface(ABC):
                 "type": str,
                 "message": dict,
                 "receiver": dict,
+                "sending_settings": dict
             }
         """
         msg: dict = self.message.build_message_pack()
