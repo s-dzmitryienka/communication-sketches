@@ -1,2 +1,2 @@
 ## Infra Design
-![CommunicationDesign](./communication_deisgn_1.pdf)
+![CommunicationDesign](./communication_design_page1.png)
