@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from dataclasses import dataclass
 from enum import Enum
 from uuid import UUID
 from core_service.message import Message
@@ -15,8 +16,12 @@ class NotificationLinkedObjectClassifier(Enum):
 
 @dataclass
 class MessagePayload:
-    ...
-
+    linked_object_id: UUID
+    linked_object_type: ENUM
+    type: ENUM
+    message: MessageTypedDict
+    receiver: ReceiverTypedDict
+    sending_settings: SendingSettignsTypedDict
 
 
 class Notification(Model):
@@ -52,7 +57,7 @@ class Notification(Model):
     status_details: str
 
     @property
-    def message_payload(self) -> dict:
+    def message_payload(self) -> MessagePayload:
         """
         Have possibility to deserialize to some dataclass MessagePayload.
 
@@ -88,7 +93,7 @@ class Notification(Model):
         msg: MessagePayload = self.message_payload
         return msg.sending_settings
 
-    def send(self) -> None:
+    def prepare_and_send(self) -> None:
         """
         Sends notification using each channel type associated in settings
         """

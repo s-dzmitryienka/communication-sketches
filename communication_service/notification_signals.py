@@ -1,6 +1,6 @@
-def notification_signals(instance: Notification, sender: Notification):
-    if created:
-        instance.send()
+# def notification_signals(instance: Notification, sender: Notification):
+#     if created:
+#         instance.send()
 
 
 def notification_item_signals(instance: NotificationItem, sender: NotificationItem):

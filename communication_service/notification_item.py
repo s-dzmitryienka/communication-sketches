@@ -1,4 +1,5 @@
 from enum import Enum
+from communication_service.message_builder import EmailMessageBuilder
 from notification import Notification
 from notification_channels import NotificationChannelType
 
@@ -10,7 +11,7 @@ class NotificationItemStatus(Enum):
 
 
 class NotificationItem(Model):
-    notification: FK(Notification)
+    notification: Notification  #FK(Notification)
     channel_type: NotificationChannelType
     status: NotificationItemStatus
     details: str
@@ -32,10 +33,11 @@ class NotificationItem(Model):
     def send(self):
         try:
             message_builder: MessageBuilderIntrerface = self.get_msg_builder()
-            message: Message = message_builder.build_from(self.notification.message_payload)
+            message: PreparedMessage = message_builder.build_from(message_payload=self.notification.message_payload)
+            receiver: ReceiverTypedDict = self.notification.message_payload.receiver
 
             sender = self.get_sender()
-            provider_response = sender.send(message)
+            provider_response = sender.send(receiver=receiver, message=message)
         except Exception as e:
             self.status = "ERROR"
             self.details = str(e)[:256]
