@@ -97,9 +97,7 @@ class Notification(Model):
         """
         Sends notification using each channel type associated in settings
         """
-        # sending_settings = core_cli.get_sending_settings(self.sending_settings_id)
-        # or sending_settings = dynamodb.get_sending_settings(self.sending_settings_id)
-
+        
         if self.sending_settings.is_email_channel_enabled:
             email_notification_item: NotificationItem = NotificationItem.objects.create(
                 channel_type="EMAIL",
