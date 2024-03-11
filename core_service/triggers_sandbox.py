@@ -66,3 +66,15 @@ Out:
     [AterPaymentsCommunicationEventObserver]: process message: guest payment Complete
     [AterPaymentsWebhookEventObserver]: process message: guest payment Complete
 """
+
+# ---------------------------------OR------------------------------
+
+class AfterPaymentCompleteTriggerSubject(TriggerSubjectInterface):
+    subscribed_observers = (
+        AterPaymentsCommunicationEventObserver,
+        AterPaymentsWebhookEventObserver,
+    )
+    @classmethod
+    def on_event(cls, msg: str) -> None:
+        for observer in cls.subscribed_observers:
+            observer.on_event(msg)
