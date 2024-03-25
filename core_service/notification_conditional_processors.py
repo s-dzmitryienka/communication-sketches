@@ -65,3 +65,42 @@ class NotificationConditionalProcessorAfterPayments(NotificationConditionalProce
     
     def should_send(self, *args, **kwargs) -> bool:
         return self._are_all_conditions_satisfy()
+
+
+class NotificationConditionalProcessorGuestRegistration(NotificationConditionalProcessorInterface):
+
+    
+    def validate(self, *args, **kwargs):
+        assert type(self.obj) is Guest, f"Wrong object type for {self.__class__.__name__}!"
+
+    def get_receiver_contact(self, *args, **kwargs) -> ReceiverContact:
+        return ReceiverContact.build_contact_for_reservation(reservation=self.obj.reservation)
+
+    def build_message(self, *args, **kwargs) -> Type[MessageInterface]:
+        return AbstractMessagesFactory.create_after_payments_complete_message(guest_payment=self.obj)
+    
+    def _are_all_conditions_satisfy(self):
+        """Check here all conditions about guest was registered"""
+    
+    def should_send(self, *args, **kwargs) -> bool:
+        return self._are_all_conditions_satisfy()
+    
+
+class NotificationConditionalProcessorGuestPassedBiomatchAndCompletePayments(NotificationConditionalProcessorInterface):
+
+    
+    def validate(self, *args, **kwargs):
+        assert type(self.obj) is Guest, f"Wrong object type for {self.__class__.__name__}!"
+
+    def get_receiver_contact(self, *args, **kwargs) -> ReceiverContact:
+        return ReceiverContact.build_contact_for_reservation(reservation=self.obj.reservation)
+
+    def build_message(self, *args, **kwargs) -> Type[MessageInterface]:
+        return AbstractMessagesFactory.create_after_payments_complete_message(guest_payment=self.obj)
+    
+    def _are_all_conditions_satisfy(self):
+        """Check here all conditions about leader guest passed biomatch and complete payment!"""
+        return True
+    
+    def should_send(self, *args, **kwargs) -> bool:
+        return self._are_all_conditions_satisfy()
